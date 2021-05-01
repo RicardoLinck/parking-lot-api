@@ -2,24 +2,29 @@ package main
 
 import (
 	"fmt"
+	"log"
 
+	"github.com/RicardoLinck/parking-lot-api/barrier"
 	"github.com/gin-gonic/gin"
 )
 
-type access struct {
-	barrierIn  string
-	barrierOut string
-}
-
 func main() {
 	r := gin.Default()
-	a := make(map[string]*access)
+	bc := barrier.NewBarrierConfig("./logs/barriers")
 
 	r.POST("/barrier/:barrierID/in/:registration", func(c *gin.Context) {
 		reg := c.Param("registration")
 		bID := c.Param("barrierID")
+		if err := bc.Validate(bID); err != nil {
+			c.JSON(404, gin.H{
+				"error": err,
+			})
+		}
 
-		a[reg] = &access{barrierIn: bID}
+		err := bc.In(bID, reg)
+		if err != nil {
+			log.Print(err)
+		}
 
 		c.JSON(200, gin.H{
 			"message": fmt.Sprintf("registration-id: %s entered the parking lot using barrier %s", reg, bID),
@@ -29,19 +34,19 @@ func main() {
 	r.POST("/barrier/:barrierID/out/:registration", func(c *gin.Context) {
 		reg := c.Param("registration")
 		bID := c.Param("barrierID")
+		if err := bc.Validate(bID); err != nil {
+			c.JSON(404, gin.H{
+				"error": err,
+			})
+		}
 
-		car := a[reg]
-		car.barrierOut = bID
-		delete(a, reg)
+		err := bc.Out(bID, reg)
+		if err != nil {
+			log.Print(err)
+		}
 
 		c.JSON(200, gin.H{
 			"message": fmt.Sprintf("registration-id: %s exited the parking lot using barrier %s", reg, bID),
-		})
-	})
-
-	r.GET("/overview", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": fmt.Sprintf("there are %v cars in the parking lot", len(a)),
 		})
 	})
 
