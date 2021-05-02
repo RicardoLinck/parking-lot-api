@@ -37,6 +37,10 @@ func (b *BarrierConfig) Validate(id string) error {
 	return nil
 }
 
+func (b *BarrierConfig) Logs(id string) ([]AccessLog, error) {
+	return ReadAccessLog(id, b.accessLogsPath)
+}
+
 func NewBarrierConfig(accessLogsPath string) *BarrierConfig {
 	return &BarrierConfig{
 		barriers: map[string]bool{

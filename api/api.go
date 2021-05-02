@@ -50,5 +50,25 @@ func ConfigureEndpoints(bc *barrier.BarrierConfig) *gin.Engine {
 			"message": fmt.Sprintf("registration-id: %s exited the parking lot using barrier %s", reg, bID),
 		})
 	})
+
+	r.GET("/barrier/:barrierID/logs", func(c *gin.Context) {
+		bID := c.Param("barrierID")
+		if err := bc.Validate(bID); err != nil {
+			c.JSON(404, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		logs, err := bc.Logs(bID)
+		if err != nil {
+			c.JSON(500, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		c.JSON(200, logs)
+	})
 	return r
 }

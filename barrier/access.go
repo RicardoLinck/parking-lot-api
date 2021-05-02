@@ -8,10 +8,10 @@ import (
 )
 
 type AccessLog struct {
-	Timestamp      time.Time
-	BarrierID      string
-	CarRegisration string
-	Direction      string
+	Timestamp      time.Time `json:"timestamp"`
+	BarrierID      string    `json:"barrier_id"`
+	CarRegisration string    `json:"car_registration"`
+	Direction      string    `json:"direction"`
 }
 
 func SaveAccessLog(a AccessLog, accessLogsPath string) error {
